@@ -9,10 +9,10 @@
     "panel_custom",
     "frontend"
   ],
-  "documentation": "https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager",
+  "documentation": "https://github.com/oxyde42/ha-state-class-manager",
   "integration_type": "service",
   "iot_class": "calculated",
-  "issue_tracker": "https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/issues",
+  "issue_tracker": "https://github.com/oxyde42/ha-state-class-manager/issues",
   "requirements": [],
   "single_config_entry": true,
   "version": "0.2.0"

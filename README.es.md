@@ -1,10 +1,10 @@
-![State Class Manager](https://raw.githubusercontent.com/YOUR-GITHUB-NAME/ha-state-class-manager/main/images/icon_128.png)
+![State Class Manager](https://raw.githubusercontent.com/oxyde42/ha-state-class-manager/main/images/icon_128.png)
 
 # State Class Manager
 
-[English](https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/blob/main/README.md) | [Deutsch](https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/blob/main/README.de.md) | [Français](https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/blob/main/README.fr.md) | **Español** | [Italiano](https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/blob/main/README.it.md) | [Nederlands](https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/blob/main/README.nl.md)
+[English](https://github.com/oxyde42/ha-state-class-manager/blob/main/README.md) | [Deutsch](https://github.com/oxyde42/ha-state-class-manager/blob/main/README.de.md) | [Français](https://github.com/oxyde42/ha-state-class-manager/blob/main/README.fr.md) | **Español** | [Italiano](https://github.com/oxyde42/ha-state-class-manager/blob/main/README.it.md) | [Nederlands](https://github.com/oxyde42/ha-state-class-manager/blob/main/README.nl.md)
 
-[![Abre tu instancia de Home Assistant y muestra el repositorio en HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=YOUR-GITHUB-NAME&repository=ha-state-class-manager&category=integration)
+[![Abre tu instancia de Home Assistant y muestra el repositorio en HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=oxyde42&repository=ha-state-class-manager&category=integration)
 
 Quita la `state_class` de tus sensores con unos pocos clics para que Home Assistant deje de guardar sus estadísticas en la base de datos. Sin editar YAML a mano.
 
@@ -29,7 +29,7 @@ Con State Class Manager eliges los sensores para los que no necesitas estadísti
 
 ## Instalación mediante HACS
 
-1. Pulsa el botón de arriba, o abre HACS → ⋮ → **Repositorios personalizados**, pega `https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager` y elige la categoría **Integración**.
+1. Pulsa el botón de arriba, o abre HACS → ⋮ → **Repositorios personalizados**, pega `https://github.com/oxyde42/ha-state-class-manager` y elige la categoría **Integración**.
 2. Busca «State Class Manager» en HACS y pulsa **Descargar**.
 3. Reinicia Home Assistant.
 4. Añade la integración: pulsa el botón de abajo, o ve a *Ajustes → Dispositivos y servicios → Añadir integración → State Class Manager*.
