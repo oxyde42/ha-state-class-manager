@@ -5,6 +5,7 @@ const esc = (s) =>
 
 const TR = {
   en: {
+    sort_by: "Sort by {col}",
     menu: "Menu",
     help_summary: "ℹ️ Help: What is this for?",
     help_p1: "For sensors with a so-called <b>state_class</b>, Home Assistant additionally creates statistics (short-term values every 5 minutes, long-term values hourly). Long-term statistics are kept permanently and make the database grow over time.",
@@ -43,6 +44,7 @@ const TR = {
     pill_waiting: "still active, waiting for sensor update",
   },
   de: {
+    sort_by: "Nach {col} sortieren",
     menu: "Menü",
     help_summary: "ℹ️ Hilfe: Wozu ist das gut?",
     help_p1: "Für Sensoren mit einer sogenannten <b>state_class</b> legt Home Assistant zusätzlich Statistiken an (Kurzzeitwerte alle 5 Minuten, Langzeitwerte stündlich). Die Langzeitstatistik wird dauerhaft aufbewahrt und lässt die Datenbank mit der Zeit immer weiter wachsen.",
@@ -81,6 +83,7 @@ const TR = {
     pill_waiting: "noch aktiv, wartet auf Sensor-Update",
   },
   fr: {
+    sort_by: "Trier par {col}",
     menu: "Menu",
     help_summary: "ℹ️ Aide : à quoi ça sert ?",
     help_p1: "Pour les capteurs ayant une <b>state_class</b>, Home Assistant crée en plus des statistiques (valeurs à court terme toutes les 5 minutes, valeurs à long terme toutes les heures). Les statistiques à long terme sont conservées indéfiniment et font grossir la base de données au fil du temps.",
@@ -119,6 +122,7 @@ const TR = {
     pill_waiting: "encore active, en attente de la mise à jour du capteur",
   },
   es: {
+    sort_by: "Ordenar por {col}",
     menu: "Menú",
     help_summary: "ℹ️ Ayuda: ¿para qué sirve?",
     help_p1: "Para los sensores con una <b>state_class</b>, Home Assistant crea además estadísticas (valores a corto plazo cada 5 minutos, valores a largo plazo cada hora). Las estadísticas a largo plazo se conservan para siempre y hacen que la base de datos crezca con el tiempo.",
@@ -165,6 +169,10 @@ class StateClassManagerPanel extends HTMLElement {
     this._pending = new Map(); // entity_id -> true (remove) / false (restore)
     this._search = "";
     this._mode = "all";
+    this._sortKey = "integration";
+    this._sortDir = "asc";
+    this._sortSnap = null;
+    this._coll = null;
     this._pkgActive = true;
     this._yamlFile = "state_class_manager.yaml";
     this._busy = false;
@@ -207,6 +215,7 @@ class StateClassManagerPanel extends HTMLElement {
       this._pkgActive = res.package_active;
       this._yamlFile = res.yaml_file;
       this._pending.clear();
+      this._snap();
       this._setMsg("");
     } catch (e) {
       this._setMsg(this._t("load_error") + (e.message || e));
@@ -232,6 +241,79 @@ class StateClassManagerPanel extends HTMLElement {
         String(i.platform || "").toLowerCase().includes(q) ||
         String(i.device_class || "").toLowerCase().includes(q)
       );
+    });
+  }
+
+  _collator() {
+    if (!this._coll) {
+      try {
+        this._coll = new Intl.Collator(this._hass?.language || undefined, { numeric: true, sensitivity: "base" });
+      } catch (e) {
+        this._coll = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+      }
+    }
+    return this._coll;
+  }
+
+  // Remember which rows are marked, so rows do not jump while ticking boxes.
+  _snap() {
+    this._sortSnap = new Map(this._items.map((i) => [i.entity_id, this._isRemoved(i)]));
+  }
+
+  _removedForSort(item) {
+    return this._sortSnap && this._sortSnap.has(item.entity_id)
+      ? this._sortSnap.get(item.entity_id)
+      : this._isRemoved(item);
+  }
+
+  _sorted(rows) {
+    const coll = this._collator();
+    const dir = this._sortDir === "asc" ? 1 : -1;
+    // Empty values always go last, independent of the direction.
+    const str = (a, b, d) => {
+      const ea = !a;
+      const eb = !b;
+      if (ea || eb) return ea && eb ? 0 : ea ? 1 : -1;
+      return d * coll.compare(String(a), String(b));
+    };
+    const crit = {
+      integration: (x, y, d) => str(x.platform, y.platform, d),
+      sensor: (x, y, d) => str(x.name, y.name, d),
+      remove: (x, y, d) => d * ((this._removedForSort(x) ? 0 : 1) - (this._removedForSort(y) ? 0 : 1)),
+    };
+    const chains = {
+      integration: ["integration", "sensor"],
+      sensor: ["sensor", "integration"],
+      remove: ["remove", "integration", "sensor"],
+    };
+    const chain = chains[this._sortKey] || chains.integration;
+    return rows.slice().sort((x, y) => {
+      for (let k = 0; k < chain.length; k++) {
+        // The direction applies to the main criterion only.
+        const r = crit[chain[k]](x, y, k === 0 ? dir : 1);
+        if (r) return r;
+      }
+      return str(x.entity_id, y.entity_id, 1);
+    });
+  }
+
+  _setSort(key) {
+    if (this._sortKey === key) this._sortDir = this._sortDir === "asc" ? "desc" : "asc";
+    else {
+      this._sortKey = key;
+      this._sortDir = "asc";
+    }
+    this._snap();
+    this._renderRows();
+  }
+
+  _renderHeader() {
+    this.shadowRoot.querySelectorAll("th[data-sort]").forEach((th) => {
+      const active = th.dataset.sort === this._sortKey;
+      th.classList.toggle("active", active);
+      th.setAttribute("aria-sort", active ? (this._sortDir === "asc" ? "ascending" : "descending") : "none");
+      const arrow = th.querySelector(".arrow");
+      if (arrow) arrow.textContent = active ? (this._sortDir === "asc" ? "▲" : "▼") : "";
     });
   }
 
@@ -284,6 +366,10 @@ class StateClassManagerPanel extends HTMLElement {
         table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
         th { text-align:left; color:var(--secondary-text-color); font-weight:500; padding:6px 8px; border-bottom:1px solid var(--divider-color); }
         td { padding:8px; border-bottom:1px solid var(--divider-color); vertical-align:middle; }
+        th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+        th.sortable:hover, th.sortable:focus-visible { color:var(--primary-text-color); outline:none; }
+        th.sortable.active { color:var(--primary-color); }
+        .arrow { display:inline-block; min-width:14px; margin-left:4px; font-size:10px; }
         tr.changed td { background:color-mix(in srgb, var(--primary-color) 10%, transparent); }
         .id { color:var(--secondary-text-color); font-size:12px; }
         .pill { display:inline-block; padding:2px 8px; border-radius:10px; background:var(--secondary-background-color); font-size:12px; }
@@ -330,7 +416,12 @@ class StateClassManagerPanel extends HTMLElement {
           <p id="msg"></p>
           <div style="overflow-x:auto">
             <table>
-              <thead><tr><th>${this._t("th_remove")}</th><th>${this._t("th_sensor")}</th><th>${this._t("th_integration")}</th><th>state_class</th></tr></thead>
+              <thead id="head"><tr>
+                <th class="sortable" data-sort="remove" tabindex="0" title="${this._t("sort_by", { col: this._t("th_remove") })}">${this._t("th_remove")}<span class="arrow"></span></th>
+                <th class="sortable" data-sort="sensor" tabindex="0" title="${this._t("sort_by", { col: this._t("th_sensor") })}">${this._t("th_sensor")}<span class="arrow"></span></th>
+                <th class="sortable" data-sort="integration" tabindex="0" title="${this._t("sort_by", { col: this._t("th_integration") })}">${this._t("th_integration")}<span class="arrow"></span></th>
+                <th>state_class</th>
+              </tr></thead>
               <tbody id="rows"></tbody>
             </table>
           </div>
@@ -352,17 +443,31 @@ class StateClassManagerPanel extends HTMLElement {
     });
     $("#rmAll").addEventListener("click", () => {
       this._filtered().forEach((i) => this._setPending(i, true));
+      this._snap();
       this._update();
     });
     $("#rsAll").addEventListener("click", () => {
       this._filtered().forEach((i) => this._setPending(i, false));
+      this._snap();
       this._update();
     });
     $("#discard").addEventListener("click", () => {
       this._pending.clear();
+      this._snap();
       this._update();
     });
     $("#save").addEventListener("click", () => this._save());
+    $("#head").addEventListener("click", (e) => {
+      const th = e.target.closest("th[data-sort]");
+      if (th) this._setSort(th.dataset.sort);
+    });
+    $("#head").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const th = e.target.closest("th[data-sort]");
+      if (!th) return;
+      e.preventDefault();
+      this._setSort(th.dataset.sort);
+    });
     $("#warn").addEventListener("click", (e) => {
       if (e.target.closest("#autosetup")) this._autoSetup();
     });
@@ -425,7 +530,8 @@ class StateClassManagerPanel extends HTMLElement {
   }
 
   _renderRows() {
-    const rows = this._filtered();
+    this._renderHeader();
+    const rows = this._sorted(this._filtered());
     const tbody = this.shadowRoot.querySelector("#rows");
     tbody.innerHTML = rows
       .map((i) => {

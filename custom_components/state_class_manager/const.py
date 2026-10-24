@@ -1,7 +1,7 @@
 """Constants for State Class Manager."""
 
 DOMAIN = "state_class_manager"
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 PANEL_URL_PATH = "state-class-manager"
 STATIC_URL = "/state_class_manager_static"
 YAML_FILENAME = "state_class_manager.yaml"
