@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "State Class Manager einrichten",
+        "description": "Mit **Absenden** richtet die Integration sich selbst ein:\n\n- Die Datei `state_class_manager.yaml` wird in deinem Konfigurationsordner angelegt.\n- In der `configuration.yaml` wird unter `homeassistant:` → `packages:` ein Eintrag für diese Datei ergänzt. Vorher wird automatisch eine Sicherungskopie (`.bak`) angelegt, und bei einem Fehler wird die Änderung zurückgenommen.\n\nDanach ist kein manueller Eingriff nötig."
+      },
+      "done": {
+        "title": "Einrichtung abgeschlossen",
+        "description": "{result}"
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Es ist nur eine Instanz erlaubt."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "State Class Manager",
+        "description": "Der Manager ist jederzeit unter /state-class-manager erreichbar (Adresse im Browser, Lesezeichen oder Button auf einem Dashboard mit dem Navigationspfad /state-class-manager). [Manager jetzt öffnen](/state-class-manager)",
+        "data": {
+          "show_in_sidebar": "Eintrag in der Seitenleiste anzeigen"
+        }
+      }
+    }
+  }
+}

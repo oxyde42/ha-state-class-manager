@@ -1,0 +1,19 @@
+{
+  "domain": "state_class_manager",
+  "name": "State Class Manager",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [
+    "http",
+    "websocket_api",
+    "panel_custom",
+    "frontend"
+  ],
+  "documentation": "https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/YOUR-GITHUB-NAME/ha-state-class-manager/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "0.2.0"
+}
